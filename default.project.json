@@ -1,0 +1,29 @@
+{
+  "name": "OdeScriptEditor",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+
+      "OdeScriptEditor": {
+        "$path": "src/OdeScriptEditor",
+        "$ignoreUnknownInstances": true
+      },
+
+      "OdePluginTest": {
+        "$path": "tests/OdePluginTest.server.lua"
+      }
+    },
+
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+
+        "LocalTest": {
+          "$path": "tests/LocalTest.client.lua"
+        }
+      }
+    }
+  }
+}
