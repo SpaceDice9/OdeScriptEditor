@@ -48,7 +48,7 @@ local identifiers = {
 	bit32 = 'builtin', coroutine = 'builtin', debug = 'builtin', math = 'builtin', os = 'builtin', string = 'builtin', table = 'builtin', utf8 = 'builtin',
 
 	-- Roblox globals
-	delay = 'builtin', elapsedTime = 'builtin', require = 'builtin', settings = 'builtin', spawn = 'builtin', stats = 'builtin', tick = 'builtin', UserSettings = 'builtin', wait = 'builtin', warn = 'builtin',
+	delay = 'builtin', elapsedTime = 'builtin', require = 'builtin', settings = 'builtin', spawn = 'builtin', stats = 'builtin', tick = 'builtin', UserSettings = 'builtin', wait = 'builtin', warn = 'builtin', gcinfo = 'builtin', time = 'builtin',
 	--
 	Enum = 'builtin', game = 'builtin', shared = 'builtin', script = 'builtin', plugin = 'builtin', workspace = 'builtin',
 	
@@ -62,6 +62,8 @@ local identifiers = {
 	Faces = 'builtin', Instance = 'builtin', NumberRange = 'builtin', NumberSequence = 'builtin', NumberSequenceKeypoint = 'builtin', PathWaypoint = 'builtin', PhysicalProperties = 'builtin', Random = 'builtin',
 	Ray = 'builtin', RaycastParams = 'builtin', Rect = 'builtin', Region3 = 'builtin', Region3int16 = 'builtin', TweenInfo = 'builtin', UDim = 'builtin', UDim2 = 'builtin', Vector2 = 'builtin',
 	Vector2int16 = 'builtin', Vector3 = 'builtin', Vector3int16 = 'builtin',
+
+	CatalogSearchParams = 'builtin', FloatCurveKey = 'builtin', Font = 'builtin', OverlapParams = 'builtin', SharedTable = 'builtin'
 };
 
 local operator = {

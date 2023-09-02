@@ -109,6 +109,8 @@ local lib_methods = {
 	Faces = 'builtin', Instance = 'builtin', NumberRange = 'builtin', NumberSequence = 'builtin', NumberSequenceKeypoint = 'builtin', PathWaypoint = 'builtin', PhysicalProperties = 'builtin', Random = 'builtin',
 	Ray = 'builtin', RaycastParams = 'builtin', Rect = 'builtin', Region3 = 'builtin', Region3int16 = 'builtin', TweenInfo = 'builtin', UDim = 'builtin', UDim2 = 'builtin', Vector2 = 'builtin',
 	Vector2int16 = 'builtin', Vector3 = 'builtin', Vector3int16 = 'builtin',
+
+	CatalogSearchParams = 'builtin', FloatCurveKey = 'builtin', Font = 'builtin', OverlapParams = 'builtin', SharedTable = 'builtin',
 }
 
 local odeHighlightColorsInfo = {
