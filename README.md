@@ -13,4 +13,4 @@ local scriptEditor = OdeSE.Embed(FrameInstance)
 
 # Documentation
 
-This README does not provide documentation but it can be found in the associated Roblox DevForum post.
+This README does not provide documentation but it can be found in the associated [Roblox DevForum post](https://devforum.roblox.com/t/ode-script-editor-a-simple-embedded-script-editor-entirely-in-roblox/2565346).
