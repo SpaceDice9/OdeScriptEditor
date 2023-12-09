@@ -126,6 +126,23 @@
           "$path": "tests/LocalTest.client.lua"
         }
       }
+    },
+
+    "StarterGui":{
+      "$className": "StarterGui",
+
+      "ScriptEditorScreen": {
+        "$className": "ScreenGui",
+
+        "OdeFrame": {
+          "$className": "Frame",
+          "$properties": {
+            "BackgroundTransparency": 1,
+            "Position": {"UDim2": [[0.1, 0], [0.1, 0]]},
+            "Size": {"UDim2": [[0.4, 0], [0.6, 0]]}
+          }
+        }
+      }
     }
   }
 }
