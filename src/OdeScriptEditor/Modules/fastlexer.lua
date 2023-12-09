@@ -103,6 +103,7 @@ local function next_lex(codes, i0)
 		return;
 	end;
 	local ttype = 'other';
+	-- local formatstr = false;
 	local i1 = i0;
 	if (c >= 0x30 and c <= 0x39) or (c == 0x2E and (codes[i0 + 1] and codes[i0 + 1] >= 0x30 and codes[i0 + 1] <= 0x39)) then
 		-- Numbers
@@ -128,7 +129,8 @@ local function next_lex(codes, i0)
 			end;
 		end;
 		ttype = 'number';
-	elseif c == 0x22 or c == 0x27 then
+	elseif c == 0x22 or c == 0x27 or c == 0x60 then
+		-- formatstr = (c == 0x60)
 		-- Strings
 		repeat
 			i1 += 1;
@@ -143,7 +145,10 @@ local function next_lex(codes, i0)
 					i1 += 1;
 				end;
 			end;
-		until codes[i1] == c or not codes[i1];
+		until codes[i1] == c --[[or (formatstr and codes[i1] == 0x7B)]] or not codes[i1];
+		-- if not (formatstr and codes[i1] == 0x7B) then
+		-- 	i1 += 1;
+		-- end
 		i1 += 1;
 		ttype = 'string';
 	elseif operator[c] then
@@ -207,7 +212,7 @@ local function next_lex(codes, i0)
 		repeat
 			i1 += 1;
 			c = codes[i1];
-		until (not c) or (c < 0x30 or c > 0x39) and (c < 0x41 or c > 0x5A) and (c < 0x61 or c > 0x7A) and c ~= 0x5F and c ~= 0x22 and c ~= 0x27 and not operator[c];
+		until (not c) or (c < 0x30 or c > 0x39) and (c < 0x41 or c > 0x5A) and (c < 0x61 or c > 0x7A) and c ~= 0x5F and c ~= 0x22 and c ~= 0x27 --[[and c ~= 0x60]] and not operator[c];
 		ttype = "other"
 	end;
 	-- Whitespaces

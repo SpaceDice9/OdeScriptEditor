@@ -255,7 +255,7 @@ local function colorify(code, theme)
 			local src = tokenData.src
 
 			--takes care of strange bug where given trim is larger than reality
-			if tokenData.token == "string" and not (string.match(src, '%b""') or string.match(src, "%b''")) then
+			if tokenData.token == "string" and not (string.match(src, '%b""') or string.match(src, "%b''") or string.match(src, "%b``")) then
 				trim -= 1
 			end
 
