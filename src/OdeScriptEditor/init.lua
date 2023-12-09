@@ -104,6 +104,7 @@ local lib_methods = {
 	utf8 = true,
 
 	task = true,
+	buffer = true,
 
 	Axes = 'builtin', BrickColor = 'builtin', CFrame = 'builtin', Color3 = 'builtin', ColorSequence = 'builtin', ColorSequenceKeypoint = 'builtin', DateTime = 'builtin', DockWidgetPluginGuiInfo = 'builtin',
 	Faces = 'builtin', Instance = 'builtin', NumberRange = 'builtin', NumberSequence = 'builtin', NumberSequenceKeypoint = 'builtin', PathWaypoint = 'builtin', PhysicalProperties = 'builtin', Random = 'builtin',

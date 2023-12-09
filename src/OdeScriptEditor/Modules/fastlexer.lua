@@ -52,7 +52,7 @@ local identifiers = {
 	--
 	Enum = 'builtin', game = 'builtin', shared = 'builtin', script = 'builtin', plugin = 'builtin', workspace = 'builtin',
 	
-	task = 'builtin',
+	task = 'builtin', buffer = 'builtin',
 
 	-- Depcreated
 	printidentity = 'builtin_deprecated', version = 'builtin_deprecated',
