@@ -7,7 +7,109 @@
 
       "OdeScriptEditor": {
         "$path": "src/OdeScriptEditor",
-        "$ignoreUnknownInstances": true
+        "$ignoreUnknownInstances": true,
+        
+        "Storage": {
+        "$className": "Folder",
+        "LineNumber": {
+          "$className": "TextLabel",
+          "$properties": {
+          "BackgroundTransparency": 1,
+          "Size": {"UDim2": [[1.0, -6], [0, 14]]},
+          "ZIndex": 5,
+          "Font": "SourceSans",
+          "TextColor3": [0.8,0.8,0.8],
+          "TextSize": 14,
+          "TextXAlignment": "Right",
+          "TextYAlignment": "Center"
+          }
+        },
+        "RichOverlayLabel": {
+          "$className": "TextLabel",
+          "$properties": {
+          "BackgroundTransparency": 1,
+          "Size": {"UDim2": [[1.0, 0], [0, 14]]},
+          "ZIndex": 5,
+          "Font": "Code",
+          "TextColor3": [0.8,0.8,0.8],
+          "RichText": true,
+          "TextSize": 14,
+          "TextXAlignment": "Left",
+          "TextYAlignment": "Center"
+          }
+        }
+        },
+  
+        "OSEBackground": {
+        "$className": "Frame",
+        "$properties": {
+          "BackgroundColor3": [0.15,0.15,0.15],
+          "BorderSizePixel": 0,
+          "Size": {"UDim2": [[1.0, 0], [1.0, 0]]}
+        },
+  
+        "LineNumberBackground": {
+          "$className": "Frame",
+          "$properties": {
+          "BackgroundColor3": [0.2,0.2,0.2],
+          "BorderSizePixel": 0,
+          "Size": {"UDim2": [[0, 16], [1.0, 0]]}
+          }
+        },
+  
+        "LineNumberContainer": {
+          "$className": "Frame",
+          "$properties": {
+          "BackgroundTransparency": 1,
+          "Position": {"UDim2": [[0, 0], [0, 5]]},
+          "Size": {"UDim2": [[0, 16], [1.0, -10]]},
+          "ZIndex": 2
+          },
+  
+          "UIListLayout": {
+          "$className": "UIListLayout",
+          "$properties": {
+            "HorizontalAlignment": "Center",
+            "SortOrder": "LayoutOrder"
+          }
+          }
+        },
+  
+        "RichOverlayContainer": {
+          "$className": "Frame",
+          "$properties": {
+          "BackgroundTransparency": 1,
+          "Active": true,
+          "Position": {"UDim2": [[0, 25], [0, 5]]},
+          "Size": {"UDim2": [[1.0, -30], [1.0, -10]]}
+          },
+    
+          "UIListLayout": {
+          "$className": "UIListLayout",
+          "$properties": {
+            "SortOrder": "LayoutOrder"
+          }
+          }
+        },
+  
+        "CodeField": {
+          "$className": "TextBox",
+          "$properties": {
+          "BackgroundTransparency": 1,
+          "ClearTextOnFocus": false,
+          "MultiLine": true,
+          "Position": {"UDim2": [[0, 25], [0, 5]]},
+          "Size": {"UDim2": [[1.0, -30], [1.0, -10]]},
+          "Font": "Code",
+          "Text": "",
+          "TextColor3": [0.8,0.8,0.8],
+          "TextSize": 14,
+          "TextTransparency": 0.5,
+          "TextXAlignment": "Left",
+          "TextYAlignment": "Top"
+          }
+        }
+        }
       },
 
       "OdePluginTest": {
