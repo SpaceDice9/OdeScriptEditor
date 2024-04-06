@@ -293,13 +293,18 @@ local function declareCurrentTextSize(scriptEditor, textWidth)
 	local codeField = scriptEditor.Background.CodeField
 	local richOverlayContainer = scriptEditor.Background.RichOverlayContainer
 
-	local genericSize = codeField.Size
-	local currentWidth = scriptEditor.Background.CodeField.AbsoluteSize.X
+	local textHeight = textWidth*2
 
-	local newSize = UDim2.new(1, genericSize.X.Offset - currentWidth%textWidth + 1, 1, -10)
+	local genericSize = codeField.Size
+	local currentWidth = codeField.AbsoluteSize.X
+	local currentHeight = codeField.AbsoluteSize.Y
+
+	local newSize = UDim2.new(1, genericSize.X.Offset - currentWidth%textWidth + 1, 1, -10 - currentHeight%textHeight)
 
 	codeField.Size = newSize
 	richOverlayContainer.Size = newSize
+
+	recountVisibleLines(scriptEditor)
 end
 
 local function moveShiftContainer(scriptEditor)
@@ -336,17 +341,19 @@ local function onCodeFieldEdit(scriptEditor)
 		end
 	end
 
-	local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
-	background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
-	background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
+	task.defer(function()
+		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
+		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
+		background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
 
-	codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
-	codeField.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+		codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
+		codeField.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
 
-	background.RichOverlayContainer.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
-	background.RichOverlayContainer.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+		background.RichOverlayContainer.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
+		background.RichOverlayContainer.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
 
-	declareCurrentTextSize(scriptEditor, 7)
+		declareCurrentTextSize(scriptEditor, 7)
+	end)
 
 	local luaArray = string.split(newText--[[spacesToTabs(newText)]], "\n")
 	scriptEditor.SourceData:Write(scriptEditor.LineFocused, scriptEditor.VisibleLines, luaArray)
@@ -501,8 +508,8 @@ local function removeLinesAfterResize(scriptEditor, originalSize)
 	rawEditCodeField(scriptEditor, repack(lines, "\n"))
 end
 
-local function recountVisibleLines(scriptEditor)
-	local visibleLines = math.ceil(scriptEditor.Background.CodeField.AbsoluteSize.Y/14)
+function recountVisibleLines(scriptEditor)
+	local visibleLines = math.floor(scriptEditor.Background.CodeField.AbsoluteSize.Y/14)
 
 	scriptEditor.VisibleLines = visibleLines
 end
