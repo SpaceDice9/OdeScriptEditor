@@ -663,6 +663,8 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		elseif newSize < originalSize then
 			removeLinesAfterResize(scriptEditor, originalSize)
 		end
+
+		task.defer(moveShiftContainer, scriptEditor)
 	end)
 
 	codeField.InputChanged:Connect(function(input)
