@@ -2,6 +2,7 @@ local Modules = script.Modules
 local FastLexer = require(Modules.fastlexer)
 local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
+local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
 
 local Storage = script.Storage
 
@@ -288,6 +289,28 @@ local function rawEditCodeField(scriptEditor, text)
 	end)
 end
 
+local function declareCurrentTextSize(scriptEditor, textWidth)
+	local codeField = scriptEditor.Background.CodeField
+	local richOverlayContainer = scriptEditor.Background.RichOverlayContainer
+
+	local genericSize = codeField.Size
+	local currentWidth = scriptEditor.Background.CodeField.AbsoluteSize.X
+
+	local newSize = UDim2.new(1, genericSize.X.Offset - currentWidth%textWidth + 1, 1, -10)
+
+	codeField.Size = newSize
+	richOverlayContainer.Size = newSize
+end
+
+local function moveShiftContainer(scriptEditor)
+	local background = scriptEditor.Background
+	local codeField = background.CodeField
+	local shiftContainer = background.RichOverlayContainer.ShiftContainer
+
+	scriptEditor.ScrollingShift = GetTextBoxScrolling.UpdateShift(codeField, codeField.CursorPosition, scriptEditor.ScrollingShift)
+	shiftContainer.Position = UDim2.new(0, -scriptEditor.ScrollingShift, 0, 0)
+end
+
 local function onCodeFieldEdit(scriptEditor)
 	if not registerEditEvent then
 		registerEditEvent = true
@@ -307,7 +330,7 @@ local function onCodeFieldEdit(scriptEditor)
 		end
 	end
 
-	for _, richOverlayLabel in background.RichOverlayContainer:GetChildren() do
+	for _, richOverlayLabel in background.RichOverlayContainer.ShiftContainer:GetChildren() do
 		if richOverlayLabel:IsA("TextLabel") then
 			richOverlayLabel:Destroy()
 		end
@@ -322,6 +345,8 @@ local function onCodeFieldEdit(scriptEditor)
 
 	background.RichOverlayContainer.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
 	background.RichOverlayContainer.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+
+	declareCurrentTextSize(scriptEditor, 7)
 
 	local luaArray = string.split(newText--[[spacesToTabs(newText)]], "\n")
 	scriptEditor.SourceData:Write(scriptEditor.LineFocused, scriptEditor.VisibleLines, luaArray)
@@ -346,7 +371,7 @@ local function onCodeFieldEdit(scriptEditor)
 		local richTextOverlay = Storage.RichOverlayLabel:Clone()
 		richTextOverlay.Text = enrichedLine
 		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer
+		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
 	end
 
 	if #lines < scriptEditor.VisibleLines then
@@ -428,7 +453,7 @@ local function addLinesAfterResize(scriptEditor, originalSize)
 		local richTextOverlay = Storage.RichOverlayLabel:Clone()
 		richTextOverlay.Text = enrichedLine
 		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer
+		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
 
 		rawEditCodeField(scriptEditor, scriptEditor.Background.CodeField.Text .. "\n" .. line--[[tabsToSpaces(line)]])
 	end
@@ -451,7 +476,7 @@ end
 local function removeLinesAfterResize(scriptEditor, originalSize)
 	local background = scriptEditor.Background
 
-	for _, richTextOverlay in background.RichOverlayContainer:GetChildren() do
+	for _, richTextOverlay in background.RichOverlayContainer.ShiftContainer:GetChildren() do
 		if richTextOverlay:IsA("TextLabel") then
 			if richTextOverlay.LayoutOrder > scriptEditor.VisibleLines then
 				richTextOverlay:Destroy()
@@ -505,7 +530,7 @@ function OdeScriptEditor:ApplyTheme(odeThemeData)
 		end
 	end
 
-	for _, lineLabel: Instance in pairs(background.RichOverlayContainer:GetChildren()) do
+	for _, lineLabel: Instance in pairs(background.RichOverlayContainer.ShiftContainer:GetChildren()) do
 		if lineLabel:IsA("TextLabel") then
 			lineLabel.TextColor3 = odeThemeData.text
 		end
@@ -600,6 +625,8 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		VisibleLines = 1,
 		OutputScript = nil,
 
+		ScrollingShift = 0,
+
 		OnEdit = SignalModule.new(),
 
 		Theme = OdeDefaultTheme,
@@ -611,6 +638,10 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 	codeField:GetPropertyChangedSignal("Text"):Connect(function()
 		onCodeFieldEdit(scriptEditor)
+	end)
+
+	codeField:GetPropertyChangedSignal("CursorPosition"):Connect(function()
+		task.defer(moveShiftContainer, scriptEditor)
 	end)
 
 	background:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
