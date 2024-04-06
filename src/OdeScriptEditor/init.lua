@@ -2,6 +2,7 @@ local Modules = script.Modules
 local FastLexer = require(Modules.fastlexer)
 local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
+local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
 
 local Storage = script.Storage
 
@@ -288,6 +289,33 @@ local function rawEditCodeField(scriptEditor, text)
 	end)
 end
 
+local function declareCurrentTextSize(scriptEditor, textWidth)
+	local codeField = scriptEditor.Background.CodeField
+	local richOverlayContainer = scriptEditor.Background.RichOverlayContainer
+
+	local textHeight = textWidth*2
+
+	local genericSize = codeField.Size
+	local currentWidth = codeField.AbsoluteSize.X
+	local currentHeight = codeField.AbsoluteSize.Y
+
+	local newSize = UDim2.new(1, genericSize.X.Offset - currentWidth%textWidth + 1, 1, -10 - currentHeight%textHeight)
+
+	codeField.Size = newSize
+	richOverlayContainer.Size = newSize
+
+	recountVisibleLines(scriptEditor)
+end
+
+local function moveShiftContainer(scriptEditor)
+	local background = scriptEditor.Background
+	local codeField = background.CodeField
+	local shiftContainer = background.RichOverlayContainer.ShiftContainer
+
+	scriptEditor.ScrollingShift = GetTextBoxScrolling.UpdateShift(codeField, codeField.CursorPosition, scriptEditor.ScrollingShift)
+	shiftContainer.Position = UDim2.new(0, -scriptEditor.ScrollingShift, 0, 0)
+end
+
 local function onCodeFieldEdit(scriptEditor)
 	if not registerEditEvent then
 		registerEditEvent = true
@@ -307,21 +335,25 @@ local function onCodeFieldEdit(scriptEditor)
 		end
 	end
 
-	for _, richOverlayLabel in background.RichOverlayContainer:GetChildren() do
+	for _, richOverlayLabel in background.RichOverlayContainer.ShiftContainer:GetChildren() do
 		if richOverlayLabel:IsA("TextLabel") then
 			richOverlayLabel:Destroy()
 		end
 	end
 
-	local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
-	background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
-	background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
+	task.defer(function()
+		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
+		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
+		background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
 
-	codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
-	codeField.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+		codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
+		codeField.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
 
-	background.RichOverlayContainer.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
-	background.RichOverlayContainer.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+		background.RichOverlayContainer.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
+		background.RichOverlayContainer.Size = UDim2.new(1, -(lineNumberWidth + 9 + 5), 1, -10)
+
+		declareCurrentTextSize(scriptEditor, 7)
+	end)
 
 	local luaArray = string.split(newText--[[spacesToTabs(newText)]], "\n")
 	scriptEditor.SourceData:Write(scriptEditor.LineFocused, scriptEditor.VisibleLines, luaArray)
@@ -346,7 +378,7 @@ local function onCodeFieldEdit(scriptEditor)
 		local richTextOverlay = Storage.RichOverlayLabel:Clone()
 		richTextOverlay.Text = enrichedLine
 		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer
+		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
 	end
 
 	if #lines < scriptEditor.VisibleLines then
@@ -428,7 +460,7 @@ local function addLinesAfterResize(scriptEditor, originalSize)
 		local richTextOverlay = Storage.RichOverlayLabel:Clone()
 		richTextOverlay.Text = enrichedLine
 		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer
+		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
 
 		rawEditCodeField(scriptEditor, scriptEditor.Background.CodeField.Text .. "\n" .. line--[[tabsToSpaces(line)]])
 	end
@@ -451,7 +483,7 @@ end
 local function removeLinesAfterResize(scriptEditor, originalSize)
 	local background = scriptEditor.Background
 
-	for _, richTextOverlay in background.RichOverlayContainer:GetChildren() do
+	for _, richTextOverlay in background.RichOverlayContainer.ShiftContainer:GetChildren() do
 		if richTextOverlay:IsA("TextLabel") then
 			if richTextOverlay.LayoutOrder > scriptEditor.VisibleLines then
 				richTextOverlay:Destroy()
@@ -476,8 +508,8 @@ local function removeLinesAfterResize(scriptEditor, originalSize)
 	rawEditCodeField(scriptEditor, repack(lines, "\n"))
 end
 
-local function recountVisibleLines(scriptEditor)
-	local visibleLines = math.ceil(scriptEditor.Background.CodeField.AbsoluteSize.Y/14)
+function recountVisibleLines(scriptEditor)
+	local visibleLines = math.floor(scriptEditor.Background.CodeField.AbsoluteSize.Y/14)
 
 	scriptEditor.VisibleLines = visibleLines
 end
@@ -505,7 +537,7 @@ function OdeScriptEditor:ApplyTheme(odeThemeData)
 		end
 	end
 
-	for _, lineLabel: Instance in pairs(background.RichOverlayContainer:GetChildren()) do
+	for _, lineLabel: Instance in pairs(background.RichOverlayContainer.ShiftContainer:GetChildren()) do
 		if lineLabel:IsA("TextLabel") then
 			lineLabel.TextColor3 = odeThemeData.text
 		end
@@ -600,6 +632,8 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		VisibleLines = 1,
 		OutputScript = nil,
 
+		ScrollingShift = 0,
+
 		OnEdit = SignalModule.new(),
 
 		Theme = OdeDefaultTheme,
@@ -611,6 +645,10 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 	codeField:GetPropertyChangedSignal("Text"):Connect(function()
 		onCodeFieldEdit(scriptEditor)
+	end)
+
+	codeField:GetPropertyChangedSignal("CursorPosition"):Connect(function()
+		task.defer(moveShiftContainer, scriptEditor)
 	end)
 
 	background:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
@@ -625,6 +663,8 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		elseif newSize < originalSize then
 			removeLinesAfterResize(scriptEditor, originalSize)
 		end
+
+		task.defer(moveShiftContainer, scriptEditor)
 	end)
 
 	codeField.InputChanged:Connect(function(input)
