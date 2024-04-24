@@ -334,7 +334,7 @@ local function updateLines(scriptEditor)
 	end
 	
 	scriptEditor.Background.LineNumberContainer.LineNumber.Text = table.concat(lineNumbers, "\n")
-	scriptEditor.Background.RichOverlayContainer.RichOverlayLabel.Text = table.concat(enrichedLines, "\n")
+	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = table.concat(enrichedLines, "\n")
 end
 
 local function onCodeFieldEdit(scriptEditor)
@@ -578,7 +578,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 	}
 	
 	Storage.LineNumber:Clone().Parent = background.LineNumberContainer
-	Storage.RichOverlayLabel:Clone().Parent = background.RichOverlayContainer
+	Storage.RichOverlayLabel:Clone().Parent = background.RichOverlayContainer.ShiftContainer
 
 	setmetatable(scriptEditor, OdeScriptEditor)
 
