@@ -571,6 +571,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		OutputScript = nil,
 
 		ScrollingShift = 0,
+		Destroyed = false,
 
 		OnEdit = SignalModule.new(),
 
@@ -620,6 +621,17 @@ end
 function OdeScriptEditor:Relocate(newFrame: GuiBase2d)
 	local background = self.Background
 	background.Parent = newFrame
+end
+
+function OdeScriptEditor:Destroy()
+	if self.Destroyed then
+		return
+	end
+
+	self.Destroyed = true
+
+	self.Background:Destroy()
+	self.OnEdit:DisconnectAll()
 end
 
 return OdeScriptEditor
