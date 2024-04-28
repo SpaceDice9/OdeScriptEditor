@@ -316,6 +316,27 @@ local function moveShiftContainer(scriptEditor)
 	shiftContainer.Position = UDim2.new(0, -scriptEditor.ScrollingShift, 0, 0)
 end
 
+local function updateLines(scriptEditor)
+	local lineNumbers = {}
+	local enrichedLines = {}
+	for i = 1, scriptEditor.VisibleLines do
+		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]--lines[i]
+
+		if not line then
+			break
+		end
+		
+		table.insert(lineNumbers, i + scriptEditor.LineFocused - 1)
+		
+		local untabbedLine = tabsToSpaces(line)
+		local enrichedLine = colorify(untabbedLine--[[escapeRich(untabbedLine)]], scriptEditor.Theme)
+		table.insert(enrichedLines, enrichedLine)
+	end
+	
+	scriptEditor.Background.LineNumberContainer.LineNumber.Text = table.concat(lineNumbers, "\n")
+	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = table.concat(enrichedLines, "\n")
+end
+
 local function onCodeFieldEdit(scriptEditor)
 	if not registerEditEvent then
 		registerEditEvent = true
@@ -328,18 +349,6 @@ local function onCodeFieldEdit(scriptEditor)
 
 	local newText = codeField.Text
 	local lines = string.split(newText, "\n")
-
-	for _, lineNumberLabel in background.LineNumberContainer:GetChildren() do
-		if lineNumberLabel:IsA("TextLabel") then
-			lineNumberLabel:Destroy()
-		end
-	end
-
-	for _, richOverlayLabel in background.RichOverlayContainer.ShiftContainer:GetChildren() do
-		if richOverlayLabel:IsA("TextLabel") then
-			richOverlayLabel:Destroy()
-		end
-	end
 
 	task.defer(function()
 		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
@@ -361,25 +370,7 @@ local function onCodeFieldEdit(scriptEditor)
 
 	local finalRawCode = newText
 
-	for i = 1, scriptEditor.VisibleLines do
-		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]--lines[i]
-
-		if not line then
-			break
-		end
-
-		local lineNumberLabel = Storage.LineNumber:Clone()
-		lineNumberLabel.Text = i + scriptEditor.LineFocused - 1
-		lineNumberLabel.LayoutOrder = i
-		lineNumberLabel.Parent = background.LineNumberContainer
-
-		local untabbedLine = tabsToSpaces(line)
-		local enrichedLine = colorify(untabbedLine--[[escapeRich(untabbedLine)]], scriptEditor.Theme)
-		local richTextOverlay = Storage.RichOverlayLabel:Clone()
-		richTextOverlay.Text = enrichedLine
-		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
-	end
+	updateLines(scriptEditor)
 
 	if #lines < scriptEditor.VisibleLines then
 		for i = #lines + 1, scriptEditor.VisibleLines do
@@ -441,31 +432,6 @@ local function onCodeFieldEdit(scriptEditor)
 	scriptEditor.DisplayCode = finalRawCode
 end
 
-local function addLinesAfterResize(scriptEditor, originalSize)
-	local background = scriptEditor.Background
-
-	for i = originalSize + 1, scriptEditor.VisibleLines do
-		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]
-
-		if not line then
-			break
-		end
-
-		local lineNumberLabel = Storage.LineNumber:Clone()
-		lineNumberLabel.Text = i + scriptEditor.LineFocused - 1
-		lineNumberLabel.LayoutOrder = i
-		lineNumberLabel.Parent = background.LineNumberContainer
-
-		local enrichedLine = colorify(tabsToSpaces(line), scriptEditor.Theme)
-		local richTextOverlay = Storage.RichOverlayLabel:Clone()
-		richTextOverlay.Text = enrichedLine
-		richTextOverlay.LayoutOrder = i
-		richTextOverlay.Parent = background.RichOverlayContainer.ShiftContainer
-
-		rawEditCodeField(scriptEditor, scriptEditor.Background.CodeField.Text .. "\n" .. line--[[tabsToSpaces(line)]])
-	end
-end
-
 local function repack(t, separator)
 	local str = t[1]
 
@@ -478,34 +444,6 @@ local function repack(t, separator)
 	end
 
 	return str
-end
-
-local function removeLinesAfterResize(scriptEditor, originalSize)
-	local background = scriptEditor.Background
-
-	for _, richTextOverlay in background.RichOverlayContainer.ShiftContainer:GetChildren() do
-		if richTextOverlay:IsA("TextLabel") then
-			if richTextOverlay.LayoutOrder > scriptEditor.VisibleLines then
-				richTextOverlay:Destroy()
-			end
-		end
-	end
-
-	for _, lineNumberLabel in background.LineNumberContainer:GetChildren() do
-		if lineNumberLabel:IsA("TextLabel") then
-			if lineNumberLabel.LayoutOrder > scriptEditor.VisibleLines then
-				lineNumberLabel:Destroy()
-			end
-		end
-	end
-
-	local lines = string.split(background.CodeField.Text, "\n")
-
-	for i = scriptEditor.VisibleLines + 1, originalSize do
-		lines[i] = nil
-	end
-
-	rawEditCodeField(scriptEditor, repack(lines, "\n"))
 end
 
 function recountVisibleLines(scriptEditor)
@@ -638,6 +576,9 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 		Theme = OdeDefaultTheme,
 	}
+	
+	Storage.LineNumber:Clone().Parent = background.LineNumberContainer
+	Storage.RichOverlayLabel:Clone().Parent = background.RichOverlayContainer.ShiftContainer
 
 	setmetatable(scriptEditor, OdeScriptEditor)
 
@@ -656,13 +597,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 		recountVisibleLines(scriptEditor)
 
-		local newSize = scriptEditor.VisibleLines
-
-		if newSize > originalSize then
-			addLinesAfterResize(scriptEditor, originalSize)
-		elseif newSize < originalSize then
-			removeLinesAfterResize(scriptEditor, originalSize)
-		end
+		updateLines(scriptEditor)
 
 		task.defer(moveShiftContainer, scriptEditor)
 	end)
