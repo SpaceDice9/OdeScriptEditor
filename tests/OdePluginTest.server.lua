@@ -24,16 +24,48 @@ OSEWidget.Title = "OdeScriptEditor"
 
 local PluginToolbar = plugin:CreateToolbar("OSE Test")
 local OpenScript = PluginToolbar:CreateButton("Open Script", "Open Script", "rbxassetid://10734943448")
+local ReloadOse = PluginToolbar:CreateButton("Reload OSE Plugin", "Reload OSE Plugin", "rbxassetid://6023565901")
 OpenScript.ClickableWhenViewportHidden = true
+ReloadOse.ClickableWhenViewportHidden = true
 
-local OSE = require(OSEModule)
-local scriptEditor = OSE.Embed(OSEWidget)
+-- local OSE = require(OSEModule)
+-- local scriptEditor = OSE.Embed(OSEWidget)
+local OSE
+local scriptEditor
 local outputScript = nil
+
+function onEdit(source)
+	if outputScript then
+		outputScript.Source = source
+	end
+end
+
+function reloadOse()
+	if outputScript then
+		warn("Failed to reload. Unload script first to reload")
+		return
+	end
+
+	if scriptEditor then
+		scriptEditor:Destroy()
+	end
+	script:ClearAllChildren()
+
+	local updatedOseModule = OSEModule:Clone()
+	updatedOseModule.Parent = script
+
+	OSE = require(updatedOseModule)
+	scriptEditor = OSE.Embed(OSEWidget)
+
+	scriptEditor.OnEdit:Connect(onEdit)
+end
+
+reloadOse()
 
 OpenScript.Click:Connect(function()
 	local selectedScript = game:GetService("Selection"):Get()[1]
 
-	if selectedScript:IsA("LuaSourceContainer") and selectedScript:GetAttribute("OSE_Test") then
+	if selectedScript and selectedScript:IsA("LuaSourceContainer") and selectedScript:GetAttribute("OSE_Test") then
 		OSEWidget.Enabled = true
 
 		scriptEditor:LoadScriptAsync(selectedScript)
@@ -41,10 +73,8 @@ OpenScript.Click:Connect(function()
 	end
 end)
 
-scriptEditor.OnEdit:Connect(function(source)
-	if outputScript then
-		outputScript.Source = source
-	end
+ReloadOse.Click:Connect(function()
+	reloadOse()
 end)
 
 OSEWidget:BindToClose(function()
