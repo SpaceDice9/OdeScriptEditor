@@ -14,8 +14,9 @@
           "LineNumber": {
             "$className": "TextLabel",
             "$properties": {
+              "AutomaticSize": "XY",
               "BackgroundTransparency": 1,
-              "Size": {"UDim2": [[1.0, -6], [0, 14]]},
+              "Size": {"UDim2": [[1.0, -6], [0, 0]]},
               "ZIndex": 5,
               "Font": "SourceSans",
               "TextColor3": [0.8,0.8,0.8],
@@ -27,8 +28,9 @@
           "RichOverlayLabel": {
             "$className": "TextLabel",
             "$properties": {
+              "AutomaticSize": "XY",
               "BackgroundTransparency": 1,
-              "Size": {"UDim2": [[1.0, 0], [0, 14]]},
+              "Size": {"UDim2": [[1.0, 0], [0, 0]]},
               "ZIndex": 5,
               "Font": "Code",
               "TextColor3": [0.8,0.8,0.8],
