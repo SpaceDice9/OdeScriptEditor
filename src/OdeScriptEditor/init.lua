@@ -309,23 +309,24 @@ end
 
 local function updateLines(scriptEditor)
 	local lineNumbers = {}
-	local enrichedLines = {}
+
+	local visibleCodeLines = {}
+	table.move(scriptEditor.SourceData.Code, scriptEditor.LineFocused, scriptEditor.LineFocused + scriptEditor.VisibleLines - 1, 1, visibleCodeLines)
+
 	for i = 1, scriptEditor.VisibleLines do
 		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]--lines[i]
 
 		if not line then
 			break
 		end
-		
+
 		table.insert(lineNumbers, i + scriptEditor.LineFocused - 1)
-		
-		local untabbedLine = tabsToSpaces(line)
-		local enrichedLine = colorify(untabbedLine--[[escapeRich(untabbedLine)]], scriptEditor.Theme)
-		table.insert(enrichedLines, enrichedLine)
 	end
-	
+
+	local visibleCodeSegment = table.concat(visibleCodeLines, "\n")
+
 	scriptEditor.Background.LineNumberContainer.LineNumber.Text = table.concat(lineNumbers, "\n")
-	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = table.concat(enrichedLines, "\n")
+	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = colorify(tabsToSpaces(visibleCodeSegment), scriptEditor.Theme)
 end
 
 local function onCodeFieldEdit(scriptEditor)
