@@ -311,9 +311,9 @@ local function updateLines(scriptEditor)
 	local lineNumbers = {}
 
 	local visibleCodeLines = {}
-	table.move(scriptEditor.SourceData.Code, scriptEditor.LineFocused, scriptEditor.LineFocused + scriptEditor.VisibleLines - 1, 1, visibleCodeLines)
+	table.move(scriptEditor.SourceData.Code, scriptEditor.LineFocused, scriptEditor.LineFocused + scriptEditor.VisibleLines, 1, visibleCodeLines)
 
-	for i = 1, scriptEditor.VisibleLines do
+	for i = 1, scriptEditor.VisibleLines + 1 do
 		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]--lines[i]
 
 		if not line then
