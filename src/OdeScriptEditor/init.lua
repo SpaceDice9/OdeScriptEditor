@@ -343,7 +343,7 @@ local function onCodeFieldEdit(scriptEditor)
 
 	task.defer(function()
 		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
-		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
+		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 3, 1, -10)
 		background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
 
 		codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
