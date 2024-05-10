@@ -193,7 +193,7 @@ local function getTrueTokenData(i, tokenData, scanData)
 			token = "lprop"
 		end
 
-		if nextTokenData and nextTokenData.src:match("%(") then
+		if nextTokenData and (nextTokenData.src:match("^%(") or nextTokenData.src:match("^{") or nextTokenData.src:match("^\"") or nextTokenData.src:match("^\'") or nextTokenData.src:match("%[%[")) then
 			if prevTokenData and prevTokenData.src == "." then
 				token = "lmethod"
 			else
