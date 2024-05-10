@@ -58,9 +58,10 @@ function reloadOse()
 	scriptEditor = OSE.Embed(OSEWidget)
 
 	scriptEditor.OnEdit:Connect(onEdit)
+	scriptEditor:ApplyStudioTheme(settings().Studio)
 end
 
-reloadOse()
+task.defer(reloadOse)
 
 OpenScript.Click:Connect(function()
 	local selectedScript = game:GetService("Selection"):Get()[1]
@@ -74,7 +75,7 @@ OpenScript.Click:Connect(function()
 end)
 
 ReloadOse.Click:Connect(function()
-	reloadOse()
+	task.defer(reloadOse)
 end)
 
 OSEWidget:BindToClose(function()
