@@ -1,5 +1,5 @@
 local Modules = script.Modules
-local FastLexer = require(Modules.fastlexer)
+local Lexer = require(Modules.lexer)
 local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
 local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
@@ -186,15 +186,11 @@ local function getTrueTokenData(i, tokenData, scanData)
 
 	local token = tokenData.token
 
-	if token == "identifier" then
+	if token == "iden" then
 		local prevIndexData = scanData[i - 2]
 
 		if prevTokenData and prevTokenData.src == "." then
-			if prevIndexData and lib_methods[prevIndexData.src] then
-				return "builtin"
-			else
-				token = "lprop"
-			end
+			token = "lprop"
 		end
 
 		if nextTokenData and nextTokenData.src:match("%(") then
@@ -244,7 +240,7 @@ local function colorify(code, theme)
 	local size = code:len()
 	local increase = 0
 
-	local scanData = FastLexer.scan(code)
+	local scanData = Lexer.run(code)
 
 	for i, tokenData in scanData do
 		local token = tokenData.token
@@ -255,11 +251,6 @@ local function colorify(code, theme)
 		if colorData then
 			local trim = tokenData.trim
 			local src = tokenData.src
-
-			--takes care of strange bug where given trim is larger than reality
-			if tokenData.token == "string" and not (string.match(src, '%b""') or string.match(src, "%b''") or string.match(src, "%b``")) then
-				trim -= 1
-			end
 
 			local End = trim - 1 + increase
 			local Start = trim - src:len() + increase
