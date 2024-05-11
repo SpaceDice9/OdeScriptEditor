@@ -280,6 +280,42 @@ local function rawEditCodeField(scriptEditor, text)
 	end)
 end
 
+local function fixCodeFieldLines(scriptEditor, originalSize)
+	local codeField = scriptEditor.Background.CodeField
+	local newCode = codeField.Text
+
+	if scriptEditor.VisibleLines > originalSize then
+		for i = originalSize + 1, scriptEditor.VisibleLines do
+			local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]
+
+			if i > scriptEditor.SourceData.Size then
+				break
+			end
+
+			if not line then
+				break
+			end
+
+			newCode ..= "\n" .. line
+		end
+	elseif scriptEditor.VisibleLines < originalSize then
+		local lines = string.split(newCode, "\n")
+		local replacementText = lines[1] or ""
+
+		for i = 2, scriptEditor.VisibleLines do
+			if i + scriptEditor.LineFocused - 1 > scriptEditor.SourceData.Size then
+				break
+			end
+
+			replacementText = replacementText .. "\n" .. (lines[i] or "")
+		end
+
+		newCode = replacementText
+	end
+
+	return newCode
+end
+
 local function declareCurrentTextSize(scriptEditor, textWidth)
 	local codeField = scriptEditor.Background.CodeField
 	local richOverlayContainer = scriptEditor.Background.RichOverlayContainer
@@ -295,7 +331,10 @@ local function declareCurrentTextSize(scriptEditor, textWidth)
 	codeField.Size = newSize
 	richOverlayContainer.Size = newSize
 
+	local originalSize = scriptEditor.VisibleLines
+
 	recountVisibleLines(scriptEditor)
+	codeField.Text = fixCodeFieldLines(scriptEditor, originalSize)
 end
 
 local function moveShiftContainer(scriptEditor)
@@ -342,6 +381,8 @@ local function onCodeFieldEdit(scriptEditor)
 	local newText = codeField.Text
 	local lines = string.split(newText, "\n")
 
+	local finalRawCode = newText
+
 	task.defer(function()
 		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
 		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 3, 1, -10)
@@ -360,30 +401,10 @@ local function onCodeFieldEdit(scriptEditor)
 	scriptEditor.SourceData:Write(scriptEditor.LineFocused, scriptEditor.VisibleLines, luaArray)
 	scriptEditor.RawSource = scriptEditor.SourceData:ToString()
 
-	local finalRawCode = newText
-
 	updateLines(scriptEditor)
 
-	if #lines < scriptEditor.VisibleLines then
-		for i = #lines + 1, scriptEditor.VisibleLines do
-			local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]
-
-			if not line then
-				break
-			end
-
-			local untabbedLine = line--tabsToSpaces(line)
-			finalRawCode = finalRawCode .. "\n" .. untabbedLine
-		end
-	elseif #lines > scriptEditor.VisibleLines then
-		local replacementText = lines[1]
-
-		for i = 2, scriptEditor.VisibleLines do
-			replacementText = replacementText .. "\n" .. lines[i]
-		end
-
-		finalRawCode = replacementText
-	end
+	local originalSize = scriptEditor.VisibleLines
+	finalRawCode = fixCodeFieldLines(scriptEditor, #lines)
 
 	local hookModules = script.Hooks:GetChildren()
 
@@ -569,7 +590,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 		Theme = OdeDefaultTheme,
 	}
-	
+
 	Storage.LineNumber:Clone().Parent = background.LineNumberContainer
 	Storage.RichOverlayLabel:Clone().Parent = background.RichOverlayContainer.ShiftContainer
 
@@ -589,6 +610,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		local originalSize = scriptEditor.VisibleLines
 
 		recountVisibleLines(scriptEditor)
+		codeField.Text = fixCodeFieldLines(scriptEditor, originalSize)
 
 		updateLines(scriptEditor)
 
