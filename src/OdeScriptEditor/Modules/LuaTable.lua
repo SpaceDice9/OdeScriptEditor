@@ -93,20 +93,14 @@ end
 function LuaTable:ToString(RegionStart, RegionLength)
 	RegionStart = math.max(RegionStart or 1, 1)
 
-	local LuaString = ""
 	local size = math.min(RegionLength or math.huge, self.Size - RegionStart + 1)
 
 	for Line = 1, size do
 		local LuaLine = self.Code[Line + RegionStart - 1] or ""
-		local NextLine = "\n"
-
-		if Line == size then
-			NextLine = ""
-		end
-
-		LuaLine = LuaLine .. NextLine
-		LuaString = LuaString .. LuaLine
+		self.Code[Line + RegionStart - 1] = LuaLine
 	end
+
+	local LuaString = table.concat(self.Code, "\n", RegionStart, size + RegionStart - 1)
 
 	return LuaString
 end
