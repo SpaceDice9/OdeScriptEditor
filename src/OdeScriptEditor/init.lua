@@ -387,9 +387,9 @@ local function onCodeFieldEdit(scriptEditor)
 
 	local hookModules = script.Hooks:GetChildren()
 
-	table.sort(hookModules, function(a, b)
-		return a:GetAttribute("RunOrder") < b:GetAttribute("RunOrder")
-	end)
+	-- table.sort(hookModules, function(a, b)
+	-- 	return a:GetAttribute("RunOrder") < b:GetAttribute("RunOrder")
+	-- end)
 
 	local data = {
 		Code = finalRawCode,
@@ -442,6 +442,23 @@ function recountVisibleLines(scriptEditor)
 	local visibleLines = math.floor(scriptEditor.Background.CodeField.AbsoluteSize.Y/14)
 
 	scriptEditor.VisibleLines = visibleLines
+end
+
+function getLastSelectedString(scriptEditor)
+	local codeField = scriptEditor.Background.CodeField
+
+	scriptEditor._LastCursorPosition = codeField.CursorPosition
+	scriptEditor._LastSelectionStart = codeField.SelectionStart
+
+	local start = math.min(scriptEditor._LastCursorPosition, scriptEditor._LastSelectionStart)
+	local finish = math.max(scriptEditor._LastCursorPosition, scriptEditor._LastSelectionStart, 1) - 1
+
+	if start == -1 then
+		start = finish + 1
+	end
+
+	scriptEditor._LastSelectedString = string.sub(codeField.Text, start, finish)
+	scriptEditor._LastPreviousChar = string.sub(codeField.Text, start - 1, start - 1)
 end
 
 function OdeScriptEditor:ApplyTheme(odeThemeData)
@@ -562,6 +579,11 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		VisibleLines = 1,
 		OutputScript = nil,
 
+		-- used by AutoWrap
+		_LastSelectionStart = -1,
+		_LastCursorPosition = -1,
+		_LastSelectedString = "",
+		_LastPreviousChar = "",
 		ScrollingShift = 0,
 		Destroyed = false,
 
@@ -583,6 +605,11 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 	codeField:GetPropertyChangedSignal("CursorPosition"):Connect(function()
 		task.defer(moveShiftContainer, scriptEditor)
+		task.defer(getLastSelectedString, scriptEditor)
+	end)
+
+	codeField:GetPropertyChangedSignal("SelectionStart"):Connect(function()
+		task.defer(getLastSelectedString, scriptEditor)
 	end)
 
 	background:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
