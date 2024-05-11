@@ -280,6 +280,41 @@ local function rawEditCodeField(scriptEditor, text)
 	end)
 end
 
+local function fixCodeFieldLines(scriptEditor, originalSize)
+	local codeField = scriptEditor.Background.CodeField
+
+	if scriptEditor.VisibleLines > originalSize then
+		local newCode = codeField.Text
+
+		for i = originalSize + 1, scriptEditor.VisibleLines do
+			local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]
+
+			if not line then
+				break
+			end
+
+			newCode ..= "\n" .. line
+		end
+
+		codeField.Text = newCode
+	elseif scriptEditor.VisibleLines < originalSize then
+		local newCode = codeField.Text
+		local lines = string.split(newCode, "\n")
+		local replacementText = lines[1] or ""
+
+		for i = 2, scriptEditor.VisibleLines do
+			if i > scriptEditor.SourceData.Size then
+				break
+			end
+
+			replacementText = replacementText .. "\n" .. (lines[i] or "")
+		end
+
+		newCode = replacementText
+		codeField.Text = newCode
+	end
+end
+
 local function declareCurrentTextSize(scriptEditor, textWidth)
 	local codeField = scriptEditor.Background.CodeField
 	local richOverlayContainer = scriptEditor.Background.RichOverlayContainer
@@ -295,7 +330,10 @@ local function declareCurrentTextSize(scriptEditor, textWidth)
 	codeField.Size = newSize
 	richOverlayContainer.Size = newSize
 
+	local originalSize = scriptEditor.VisibleLines
+
 	recountVisibleLines(scriptEditor)
+	fixCodeFieldLines(scriptEditor, originalSize)
 end
 
 local function moveShiftContainer(scriptEditor)
@@ -569,7 +607,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 		Theme = OdeDefaultTheme,
 	}
-	
+
 	Storage.LineNumber:Clone().Parent = background.LineNumberContainer
 	Storage.RichOverlayLabel:Clone().Parent = background.RichOverlayContainer.ShiftContainer
 
@@ -589,6 +627,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		local originalSize = scriptEditor.VisibleLines
 
 		recountVisibleLines(scriptEditor)
+		fixCodeFieldLines(scriptEditor, originalSize)
 
 		updateLines(scriptEditor)
 
