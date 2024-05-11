@@ -1,5 +1,5 @@
 local Modules = script.Modules
-local FastLexer = require(Modules.fastlexer)
+local Lexer = require(Modules.lexer)
 local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
 local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
@@ -186,18 +186,14 @@ local function getTrueTokenData(i, tokenData, scanData)
 
 	local token = tokenData.token
 
-	if token == "identifier" then
+	if token == "iden" then
 		local prevIndexData = scanData[i - 2]
 
 		if prevTokenData and prevTokenData.src == "." then
-			if prevIndexData and lib_methods[prevIndexData.src] then
-				return "builtin"
-			else
-				token = "lprop"
-			end
+			token = "lprop"
 		end
 
-		if nextTokenData and nextTokenData.src:match("%(") then
+		if nextTokenData and (nextTokenData.src:match("^%(") or nextTokenData.src:match("^{") or nextTokenData.src:match("^\"") or nextTokenData.src:match("^\'") or nextTokenData.src:match("%[%[")) then
 			if prevTokenData and prevTokenData.src == "." then
 				token = "lmethod"
 			else
@@ -244,7 +240,7 @@ local function colorify(code, theme)
 	local size = code:len()
 	local increase = 0
 
-	local scanData = FastLexer.scan(code)
+	local scanData = Lexer.run(code)
 
 	for i, tokenData in scanData do
 		local token = tokenData.token
@@ -255,11 +251,6 @@ local function colorify(code, theme)
 		if colorData then
 			local trim = tokenData.trim
 			local src = tokenData.src
-
-			--takes care of strange bug where given trim is larger than reality
-			if tokenData.token == "string" and not (string.match(src, '%b""') or string.match(src, "%b''") or string.match(src, "%b``")) then
-				trim -= 1
-			end
 
 			local End = trim - 1 + increase
 			local Start = trim - src:len() + increase
@@ -318,23 +309,24 @@ end
 
 local function updateLines(scriptEditor)
 	local lineNumbers = {}
-	local enrichedLines = {}
-	for i = 1, scriptEditor.VisibleLines do
+
+	local visibleCodeLines = {}
+	table.move(scriptEditor.SourceData.Code, scriptEditor.LineFocused, scriptEditor.LineFocused + scriptEditor.VisibleLines, 1, visibleCodeLines)
+
+	for i = 1, scriptEditor.VisibleLines + 1 do
 		local line = scriptEditor.SourceData.Code[scriptEditor.LineFocused + i - 1]--lines[i]
 
 		if not line then
 			break
 		end
-		
+
 		table.insert(lineNumbers, i + scriptEditor.LineFocused - 1)
-		
-		local untabbedLine = tabsToSpaces(line)
-		local enrichedLine = colorify(untabbedLine--[[escapeRich(untabbedLine)]], scriptEditor.Theme)
-		table.insert(enrichedLines, enrichedLine)
 	end
-	
+
+	local visibleCodeSegment = table.concat(visibleCodeLines, "\n")
+
 	scriptEditor.Background.LineNumberContainer.LineNumber.Text = table.concat(lineNumbers, "\n")
-	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = table.concat(enrichedLines, "\n")
+	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = colorify(tabsToSpaces(visibleCodeSegment), scriptEditor.Theme)
 end
 
 local function onCodeFieldEdit(scriptEditor)
@@ -352,7 +344,7 @@ local function onCodeFieldEdit(scriptEditor)
 
 	task.defer(function()
 		local lineNumberWidth = 6*math.ceil(math.log10(#scriptEditor.SourceData.Code + .1))
-		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 6, 1, -10)
+		background.LineNumberContainer.Size = UDim2.new(0, lineNumberWidth + 3, 1, -10)
 		background.LineNumberBackground.Size = UDim2.new(0, lineNumberWidth + 6, 1, 0)
 
 		codeField.Position = UDim2.new(0, lineNumberWidth + 9, 0, 5)
