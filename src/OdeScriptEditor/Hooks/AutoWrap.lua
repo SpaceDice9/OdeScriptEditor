@@ -14,6 +14,10 @@ local allowedWraps = {
 }
 
 function AutoWrap.OnScriptChange(scriptEditor, data)
+	if not scriptEditor.AutoWrapEnabled then
+		return
+	end
+
 	local code = data.Code
 	local cursor = data.Cursor
 	local codeField: TextBox = scriptEditor.Background.CodeField

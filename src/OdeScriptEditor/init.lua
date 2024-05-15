@@ -601,6 +601,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		OutputScript = nil,
 
 		-- used by AutoWrap
+		AutoWrapEnabled = false,
 		_LastSelectionStart = -1,
 		_LastCursorPosition = -1,
 		_LastSelectedString = "",
