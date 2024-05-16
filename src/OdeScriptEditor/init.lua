@@ -602,10 +602,6 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 		-- used by AutoWrap
 		AutoWrapEnabled = false,
-		_LastSelectionStart = -1,
-		_LastCursorPosition = -1,
-		_LastSelectedString = "",
-		_LastPreviousChar = "",
 		ScrollingShift = 0,
 		Destroyed = false,
 
@@ -627,11 +623,6 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 	codeField:GetPropertyChangedSignal("CursorPosition"):Connect(function()
 		task.defer(moveShiftContainer, scriptEditor)
-		task.defer(getLastSelectedString, scriptEditor)
-	end)
-
-	codeField:GetPropertyChangedSignal("SelectionStart"):Connect(function()
-		task.defer(getLastSelectedString, scriptEditor)
 	end)
 
 	background:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
@@ -654,6 +645,14 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 			scriptEditor:JumpTo(newLineFocused)
 		end
 	end)
+
+	for _, hookModule in script.Hooks:GetChildren() do
+		local method = require(hookModule)["OnScriptEditorInstantiation"]
+
+		if method then
+			method(scriptEditor)
+		end
+	end
 
 	scriptEditor:LoadStringAsync("")
 
