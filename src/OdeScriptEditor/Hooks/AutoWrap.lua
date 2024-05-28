@@ -1,4 +1,6 @@
-local AutoWrap = {}
+local AutoWrap = {
+	RunOrder = 2,
+}
 
 function isCharWhitespace(char)
 	return char == "\n" or char == " "

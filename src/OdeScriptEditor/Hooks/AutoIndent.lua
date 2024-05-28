@@ -1,4 +1,6 @@
-local AutoIndent = {}
+local AutoIndent = {
+	RunOrder = 1,
+}
 
 local function testForIndent(codeField, code, start, keyword)
 	if start - keyword:len() <= 0 then

@@ -368,6 +368,16 @@ local function updateLines(scriptEditor)
 	scriptEditor.Background.RichOverlayContainer.ShiftContainer.RichOverlayLabel.Text = colorify(tabsToSpaces(visibleCodeSegment), scriptEditor.Theme)
 end
 
+local function getSortedHookModules()
+	local hookModules = script.Hooks:GetChildren()
+
+	table.sort(hookModules, function(a, b)
+		return require(a).RunOrder < require(b).RunOrder
+	end)
+
+	return hookModules
+end
+
 local function onCodeFieldEdit(scriptEditor)
 	if not registerEditEvent then
 		registerEditEvent = true
@@ -406,11 +416,7 @@ local function onCodeFieldEdit(scriptEditor)
 	local originalSize = scriptEditor.VisibleLines
 	finalRawCode = fixCodeFieldLines(scriptEditor, #lines)
 
-	local hookModules = script.Hooks:GetChildren()
-
-	-- table.sort(hookModules, function(a, b)
-	-- 	return a:GetAttribute("RunOrder") < b:GetAttribute("RunOrder")
-	-- end)
+	local hookModules = getSortedHookModules()
 
 	local data = {
 		Code = finalRawCode,
@@ -421,7 +427,7 @@ local function onCodeFieldEdit(scriptEditor)
 
 	--runs thru hooks and runs their custom behavior
 	--postprocessing code
-	for _, hookModule in script.Hooks:GetChildren() do
+	for _, hookModule in hookModules do
 		local method = require(hookModule)["OnScriptChange"]
 
 		if method then
@@ -646,7 +652,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		end
 	end)
 
-	for _, hookModule in script.Hooks:GetChildren() do
+	for _, hookModule in getSortedHookModules() do
 		local method = require(hookModule)["OnScriptEditorInstantiation"]
 
 		if method then
