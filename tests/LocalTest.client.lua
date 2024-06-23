@@ -4,3 +4,4 @@ local OdeFrame = ScriptEditorScreen:WaitForChild("OdeFrame")
 
 local OdeScriptEditor = require(game.ReplicatedStorage.OdeScriptEditor)
 local scriptEditor = OdeScriptEditor.Embed(OdeFrame)
+scriptEditor.AutoWrapEnabled = true
