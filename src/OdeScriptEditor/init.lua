@@ -562,7 +562,7 @@ function OdeScriptEditor:JumpTo(lineNumber: number)
 	end
 end
 
-function OdeScriptEditor:LoadStringAsync(str: string, lineNumber: number)
+function OdeScriptEditor:SetStringAsync(str: string, lineNumber: number)
 	self.Background.CodeField.Visible = false
 	self.Background.RichOverlayContainer.Visible = false
 	self.Background.LineNumberContainer.Visible = false
@@ -582,11 +582,11 @@ function OdeScriptEditor:LoadStringAsync(str: string, lineNumber: number)
 end
 
 function OdeScriptEditor:LoadScriptAsync(scriptObject: LuaSourceContainer, lineNumber: number)
-	self:LoadStringAsync(scriptObject.Source, lineNumber)
+	self:SetStringAsync(scriptObject.Source, lineNumber)
 end
 
 function OdeScriptEditor:Unload()
-	self:LoadStringAsync("")
+	self:SetStringAsync("")
 end
 
 function OdeScriptEditor:ReadOnly(allowEditing: boolean?)
@@ -660,7 +660,7 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		end
 	end
 
-	scriptEditor:LoadStringAsync("")
+	scriptEditor:SetStringAsync("")
 
 	return scriptEditor
 end
