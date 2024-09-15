@@ -644,7 +644,8 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 
 	codeField.InputChanged:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseWheel then
-			local newLineFocused = math.clamp(scriptEditor.LineFocused - input.Position.Z*3, 1, #string.split(scriptEditor.RawSource, "\n"))
+			local roundZ = math.round(input.Position.Z)
+			local newLineFocused = math.clamp(scriptEditor.LineFocused - roundZ*3, 1, #string.split(scriptEditor.RawSource, "\n"))
 
 			codeField:ReleaseFocus()
 
