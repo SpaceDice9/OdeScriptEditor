@@ -1,0 +1,26 @@
+{
+	"name": "OdeScriptEditor",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+
+			"AllowOdePluginTest": {
+				"$className": "Folder"
+			},
+
+			"OdePluginTest": {
+				"$className": "Folder",
+
+				"Main": {
+					"$path": "tests/OdePluginTest.server.lua"
+				},
+
+				"OdeScriptEditor": {
+					"$path": "src/OdeScriptEditor",
+					"$ignoreUnknownInstances": true
+				}
+			}
+		}
+	}
+}

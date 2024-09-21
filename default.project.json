@@ -8,10 +8,6 @@
       "OdeScriptEditor": {
         "$path": "src/OdeScriptEditor",
         "$ignoreUnknownInstances": true
-      },
-
-      "OdePluginTest": {
-        "$path": "tests/OdePluginTest.server.lua"
       }
     },
 

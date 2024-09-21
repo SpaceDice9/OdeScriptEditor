@@ -1,7 +1,7 @@
 local RunService = game:GetService("RunService")
-local OSEModule = game:GetService("ReplicatedStorage"):FindFirstChild("OdeScriptEditor")
+local OSEModule = script.Parent.OdeScriptEditor
 
-if not OSEModule then
+if not game:GetService("ReplicatedStorage"):FindFirstChild("AllowOdePluginTest") then
 	coroutine.yield(coroutine.running())
 end
 
