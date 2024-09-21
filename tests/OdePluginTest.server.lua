@@ -69,7 +69,7 @@ OpenScript.Click:Connect(function()
 	if selectedScript and selectedScript:IsA("LuaSourceContainer") and selectedScript:GetAttribute("OSE_Test") then
 		OSEWidget.Enabled = true
 
-		scriptEditor:LoadScriptAsync(selectedScript)
+		scriptEditor:SetScriptAsync(selectedScript)
 		outputScript = selectedScript
 	end
 end)

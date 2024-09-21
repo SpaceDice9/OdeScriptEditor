@@ -581,7 +581,7 @@ function OdeScriptEditor:SetStringAsync(str: string, lineNumber: number)
 	end)
 end
 
-function OdeScriptEditor:LoadScriptAsync(scriptObject: LuaSourceContainer, lineNumber: number)
+function OdeScriptEditor:SetScriptAsync(scriptObject: LuaSourceContainer, lineNumber: number)
 	self:SetStringAsync(scriptObject.Source, lineNumber)
 end
 
