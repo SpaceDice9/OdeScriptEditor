@@ -3,8 +3,11 @@ local Lexer = require(Modules.lexer)
 local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
 local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
+local InitGui = require(Modules.InitGui)
 
-local Storage = script.Storage
+-- local Storage = script.Storage
+local Storage = InitGui.storage()
+Storage.Parent = script
 
 local OdeScriptEditor = {}
 OdeScriptEditor.__index = OdeScriptEditor
@@ -594,7 +597,8 @@ function OdeScriptEditor:ReadOnly(allowEditing: boolean?)
 end
 
 function OdeScriptEditor.Embed(frame: GuiBase2d)
-	local background = script.OSEBackground:Clone()
+	-- local background = script.OSEBackground:Clone()
+	local background = InitGui.init()
 	background.Parent = frame
 
 	local scriptEditor = {
