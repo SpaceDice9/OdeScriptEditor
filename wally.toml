@@ -1,5 +1,5 @@
 [package]
-name = "datsp/odescripteditor"
+name = "spacedice9/odescripteditor"
 version = "2.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
