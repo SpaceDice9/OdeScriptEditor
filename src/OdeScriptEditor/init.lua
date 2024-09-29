@@ -1,3 +1,5 @@
+local UIS =  game:GetService("UserInputService")
+
 local Modules = script.Modules
 local Lexer = require(Modules.lexer)
 local LuaTable = require(Modules.LuaTable)
@@ -646,6 +648,60 @@ function OdeScriptEditor.Embed(frame: GuiBase2d)
 		updateLines(scriptEditor)
 
 		task.defer(moveShiftContainer, scriptEditor)
+	end)
+
+	--
+	-- This code is for scrolling code while moving the cursor up or down
+	--
+	local function handleKeyDown(Input)
+		local function getTextCursorRow()
+			local bytepos = codeField.CursorPosition
+			local raw = string.sub(codeField.Text, 1, bytepos)
+			local c = #string.split(raw, "\n")
+			print("text cursor line: " ..tostring(c))
+			return c
+		end
+		local textCursorLine = getTextCursorRow()
+		local TextBox = UIS:GetFocusedTextBox()
+		local maxLines = #string.split(scriptEditor.RawSource, "\n")
+
+		if Input.KeyCode == Enum.KeyCode.Up then
+			if scriptEditor.LineFocused > 1 and textCursorLine < 3 then
+				local newLineFocused = math.clamp(scriptEditor.LineFocused - 1, 1, maxLines)
+				codeField:CaptureFocus()
+				scriptEditor:JumpTo(newLineFocused)
+			end
+		elseif Input.KeyCode == Enum.KeyCode.Down then
+			if scriptEditor.LineFocused < maxLines - scriptEditor.VisibleLines and textCursorLine > scriptEditor.VisibleLines - 2 then
+				local newLineFocused = math.clamp(scriptEditor.LineFocused + 1, 1, maxLines)
+				codeField:CaptureFocus()
+				scriptEditor:JumpTo(newLineFocused)
+			end
+		end
+	end
+	local function repeatKeyDown(Input)
+		handleKeyDown(Input)
+		wait(.4)
+		while true  do
+			handleKeyDown(Input)
+			wait(.1)
+		end
+	end
+	local repeatKeyTask = nil
+	UIS.InputEnded:Connect(function(Input,GP)
+		if not GP then return end
+		if  Input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+		if repeatKeyTask then
+			task.cancel(repeatKeyTask)
+			repeatKeyTask = nil
+		end
+	end)
+	UIS.InputBegan:Connect(function(Input,GP)
+		if not GP then return end
+		if  Input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+		if repeatKeyTask == nil then
+			repeatKeyTask = task.spawn(repeatKeyDown, Input)
+		end
 	end)
 
 	codeField.InputChanged:Connect(function(input)
