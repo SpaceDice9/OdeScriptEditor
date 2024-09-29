@@ -4,6 +4,7 @@ local LuaTable = require(Modules.LuaTable)
 local SignalModule = require(Modules.SignalModule)
 local GetTextBoxScrolling = require(Modules.GetTextBoxScrolling)
 local InitGui = require(Modules.InitGui)
+local TextBoxPlus = require(Modules.TextBoxPlus)
 
 -- local Storage = script.Storage
 local Storage = InitGui.storage()
@@ -599,6 +600,7 @@ end
 function OdeScriptEditor.Embed(frame: GuiBase2d)
 	-- local background = script.OSEBackground:Clone()
 	local background = InitGui.init()
+	TextBoxPlus.new(background.CodeField, nil, true)
 	background.Parent = frame
 
 	local scriptEditor = {
